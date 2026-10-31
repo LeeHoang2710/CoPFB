@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="CoPFB: Content-Preserving Principal Feature Blending for training-free style personalization." />
+    <meta name="theme-color" content="#07121d" />
+    <meta property="og:title" content="CoPFB — Content-Preserving Principal Feature Blending" />
+    <meta property="og:description" content="Training-free style personalization for visual autoregressive generation." />
+    <meta property="og:image" content="./assets/figures/demo.png" />
+    <title>CoPFB | Training-Free Style Personalization</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2307121d'/%3E%3Cpath d='M11 43 31 11l22 16-21 26Z' fill='%2328d7ee'/%3E%3Cpath d='m31 11 22 16-13 5-12-12Z' fill='%23f0a04b'/%3E%3C/svg%3E" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header" data-header>
+      <a class="brand" href="#top" aria-label="CoPFB home"><span class="brand-mark">C</span><span>CoPFB</span></a>
+      <nav class="nav-links" aria-label="Primary navigation">
+        <a href="#abstract">Abstract</a><a href="#method">Method</a><a href="#results">Results</a><a href="#ablations">Ablations</a><a href="#citation">Citation</a>
+      </nav>
+    </header>
+
+    <main id="main">
+      <section class="hero" id="top" aria-labelledby="paper-title">
+        <div class="hero-media" aria-hidden="true"><img src="./assets/figures/demo.png" alt="" /></div>
+        <div class="hero-overlay"></div>
+        <div class="hero-inner">
+          <p class="eyebrow">SOICT 2026 · Training-free generation</p>
+          <h1 id="paper-title">CoPFB<span>Content-Preserving Principal Feature Blending for Training-Free Style Personalization</span></h1>
+          <p class="hero-copy">A content-aware projection that transfers reference appearance while protecting the subject, geometry, and composition requested by the prompt.</p>
+          <div class="author-list" aria-label="Authors">
+            <a href="mailto:blhoang23@apcs.fitus.edu.vn">Le-Hoang Bui<sup>1,2,†</sup></a>
+            <a href="mailto:chnguyen23@apcs.fitus.edu.vn">Hoang-Nguyen Cao<sup>1,2,†</sup></a>
+            <a href="mailto:ltnghia@fit.hcmus.edu.vn">Trung-Nghia Le<sup>1,2,‡</sup></a>
+            <a href="mailto:tmtriet@fit.hcmus.edu.vn">Minh-Triet Tran<sup>1,2</sup></a>
+            <a href="mailto:vdkhoi@selab.hcmus.edu.vn">Dinh-Khoi Vo<sup>1,2</sup></a>
+          </div>
+          <div class="affiliation-list"><span><sup>1</sup> University of Science, Ho Chi Minh City</span><span><sup>2</sup> Vietnam National University, Ho Chi Minh City</span><span><sup>†</sup> Equal contribution</span><span><sup>‡</sup> Corresponding author</span></div>
+          <div class="hero-actions"><a class="button primary" href="https://github.com/LeeHoang2710/CoPFB" target="_blank" rel="noreferrer">Code</a><a class="button" href="#citation">BibTeX</a><a class="button" href="#results">Explore results</a></div>
+        </div>
+      </section>
+
+      <section class="stats-band" aria-label="Key results"><div class="stat"><strong>1,900</strong><span>Parti × FineStyle prompt-reference pairs</span></div><div class="stat"><strong>0</strong><span>fine-tuning steps or learnable parameters</span></div><div class="stat"><strong>2.0s</strong><span>per image for the hybrid configuration</span></div></section>
+
+      <section class="section split" id="abstract"><div><p class="section-kicker">Overview</p><h2>Protect the prompt while the style comes through.</h2></div><div class="text-block"><p>Reference-based style personalization should reproduce the appearance of a style reference while preserving the subject specified by a content prompt. In visual autoregressive models, dominant reference features can also carry object and spatial information, causing content leakage.</p><p>CoPFB estimates a low-rank content basis from a clean generation branch and removes the component of the Principal Feature Blending residual that lies in this basis. A hybrid multi-scale schedule then applies conservative early edits and weaker content-filtered refinement at later scales.</p></div></section>
+
+      <section class="paper-figure full-figure" aria-labelledby="teaser-heading"><div class="teaser-copy"><p class="section-kicker">Qualitative preview</p><h2 id="teaser-heading">Appearance transfer without giving up the requested object.</h2><p>Each row begins with a reference style followed by outputs for different prompts. CoPFB preserves recognizable content while retaining palette, texture, and artistic cues.</p></div><figure class="figure-frame"><img src="./assets/figures/demo.png" alt="CoPFB style-personalized generation examples." /><figcaption>CoPFB results across content prompts and style references.</figcaption></figure></section>
+
+      <section class="paper-figure insight-figure"><figure class="figure-frame"><img src="./assets/figures/study1_stepwise_dynamics_50_lines.png" alt="Scale-wise generation dynamics across autoregressive resolutions." loading="lazy" /><figcaption>Content and style similarities rise most strongly at intermediate scales, motivating scale-dependent control.</figcaption></figure><div class="teaser-copy"><p class="section-kicker">Scale-wise insight</p><h2>Intervene where structure becomes controllable.</h2><p>The coarse-to-fine generation trajectory establishes global appearance first, forms object structure at intermediate scales, and refines local detail later. CoPFB follows that rhythm instead of injecting the same edit everywhere.</p></div></section>
+
+      <section class="section" id="method"><div class="section-heading"><p class="section-kicker">Proposed method</p><h2>Project away the content-aligned style residual.</h2></div><figure class="figure-frame wide-figure"><img src="./assets/figures/cb_pfb_overview_rescaled.png" alt="CoPFB pipeline overview." loading="lazy" /><figcaption>A clean content branch estimates the protected subspace; the editable branch receives the projected PFB residual.</figcaption></figure><div class="method-grid"><article><span class="step">01</span><h3>Build a clean content basis</h3><p>Run the unmodified generation stream and extract dominant channel directions from its intermediate features.</p></article><article><span class="step">02</span><h3>Form the PFB residual</h3><p>Compare style-reference and generation features through the same principal-feature reconstruction.</p></article><article><span class="step">03</span><h3>Remove aligned components</h3><p>Project the residual away from the content basis so reference-specific structure is less likely to leak.</p></article><article><span class="step">04</span><h3>Blend by scale</h3><p>Use unprojected rank-one edits early, projected refinement at the next scales, and no injection afterward.</p></article></div></section>
+
+      <section class="section" id="results"><div class="section-heading"><p class="section-kicker">Results</p><h2>Better prompt alignment at a competitive style score.</h2></div><div class="result-grid"><article><h3>Prompt fidelity</h3><p>CoPFB reaches 0.297 text similarity, improving over PFB+SAC at 0.293.</p></article><article><h3>Harmonic balance</h3><p>The hybrid schedule achieves the strongest harmonic content-style score: 0.393.</p></article><article><h3>Efficient inference</h3><p>Fewer intervention scales reduce time from approximately 3.8 to 2.0 seconds per image.</p></article></div><figure class="figure-frame wide-figure result-showcase"><img src="./assets/figures/qualitative_results_selected.png" alt="Qualitative comparison of CoPFB with PFB+SAC and projection variants." loading="lazy" /><figcaption>Qualitative comparison on prompt-reference pairs with semantic mismatch.</figcaption></figure></section>
+
+      <section class="section metrics-section"><div class="section-heading"><h2>Quantitative comparison</h2></div><div class="table-grid"><article class="table-card table-card-wide"><div class="table-copy"><h3>Main comparison on 1,900 pairs</h3><p>All methods are training-free and use identical prompts, references, seeds, and sampling settings.</p></div><div class="table-wrap"><table><thead><tr><th>Method</th><th>Text ↑</th><th>Image ↑</th><th>Harmonic ↑</th><th>Time ↓</th></tr></thead><tbody><tr><th>PFB+SAC</th><td>0.293</td><td><strong>0.590</strong></td><td>0.391</td><td>3.8 ± 0.6s</td></tr><tr><th>Content Projection (R3)</th><td>0.295</td><td>0.561</td><td>0.387</td><td>1.9 ± 0.3s</td></tr><tr class="ours-row"><th>CoPFB Hybrid</th><td><strong>0.297</strong></td><td>0.577</td><td><strong>0.393</strong></td><td><strong>2.0 ± 0.2s</strong></td></tr></tbody></table></div></article></div></section>
+
+      <section class="section" id="ablations"><div class="section-heading"><p class="section-kicker">Ablation study</p><h2>Every component has a role.</h2></div><div class="ablation-layout"><figure class="figure-frame"><img src="./assets/figures/content_projection_stepwise_content_style_harmonic.png" alt="Step-wise content projection ablation." loading="lazy" /><figcaption>Single-scale intervention peaks at R3, motivating the hybrid schedule.</figcaption></figure><div class="ablation-notes"><article><h3>Content-basis rank</h3><p>Rank 1 gives the best harmonic score; larger protected subspaces remove more style-relevant directions.</p></article><article><h3>Projection plus SAC</h3><p>Projection improves prompt fidelity, while SAC provides structural guidance during later refinement.</p></article><article><h3>Reference-content sensitivity</h3><p>Same-style references with different objects produce different dominant components, confirming the need for content filtering.</p></article></div></div><div class="figure-gallery"><figure class="figure-frame"><img src="./assets/figures/svd_graffiti_chair_comparison_compact.jpeg" alt="SVD sensitivity comparison for graffiti chair references." loading="lazy" /></figure><figure class="figure-frame"><img src="./assets/figures/svd_minimal_pastel_dragon_comparison_compact.png" alt="SVD sensitivity comparison for pastel dragon references." loading="lazy" /></figure><figure class="figure-frame gallery-feature"><img src="./assets/figures/svd_painting_train_comparison_compact_style_reference.jpeg" alt="SVD sensitivity comparison for painting train references." loading="lazy" /></figure></div></section>
+
+      <section class="section citation" id="citation"><div class="section-heading"><p class="section-kicker">Citation</p><h2>BibTeX</h2></div><div class="code-panel"><button class="copy-button" type="button" data-copy="#bibtex">Copy</button><pre id="bibtex"><code>@inproceedings{bui2026copfb,
+  title     = {Content-Preserving Principal Feature Blending for Training-Free Style Personalization},
+  author    = {Le-Hoang Bui and Hoang-Nguyen Cao and Trung-Nghia Le and Minh-Triet Tran and Dinh-Khoi Vo},
+  booktitle = {Proceedings of SOICT 2026},
+  year      = {2026}
+}</code></pre></div></section>
+    </main>
+    <footer class="site-footer"><p>CoPFB project page · <a href="https://github.com/LeeHoang2710/CoPFB" target="_blank" rel="noreferrer">github.com/LeeHoang2710/CoPFB</a></p></footer>
+    <script src="./script.js"></script>
+  </body>
+</html>
