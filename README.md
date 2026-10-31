@@ -117,7 +117,8 @@ Evaluate generated images with CLIP text similarity, reference-image similarity,
 
 ```bash
 python3 scripts/evaluate_content_ortho_clip.py \
-  --output-dir outputs/content_ortho_multiscale_decay_0_1_2_3_4_5
+  --generated-root outputs/content_ortho_multiscale_decay_0_1_2_3_4_5 \
+  --output-dir outputs/content_ortho_multiscale_decay_0_1_2_3_4_5/metrics
 ```
 
 The projected feature API can return diagnostics for each sample, including selected content rank, explained variance, removed fraction, spectral gap, and orthogonality residual:
